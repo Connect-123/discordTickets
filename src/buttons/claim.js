@@ -32,16 +32,16 @@ module.exports = class ClaimButton extends Button {
        // The claim function returns undefined on success, or returns a response object on failure
        if (claimResult === undefined) {
           // Rename the channel after successful claiming
-          setTimeout(async () => {
-             try {
-                const claimerName = interaction.user.username;
-                const newName = `ticket-${claimerName.toLowerCase().replace(/[^a-z0-9-]/g, '-')}`;
-                await channel.setName(newName);
-                console.log(`Renamed channel from "${global.ticketOriginalNames.get(channel.id)}" to "${newName}"`);
-             } catch (error) {
-                console.error('Error renaming channel:', error);
-             }
-          }, 500);
+          try {
+             const claimerName = interaction.user.username;
+             const newName = `ticket-${claimerName.toLowerCase().replace(/[^a-z0-9-]/g, '-')}`;
+             const currentName = channel.name;
+             console.log(`Attempting to rename channel from "${currentName}" to "${newName}"`);
+             await channel.setName(newName);
+             console.log(`Successfully renamed channel from "${currentName}" to "${newName}"`);
+          } catch (error) {
+             console.error('Error renaming channel:', error);
+          }
        } else {
           // Claim failed (non-staff user), don't rename the channel
           console.log(`Claim failed for user ${interaction.user.username}, channel name unchanged`);
