@@ -1,5 +1,8 @@
 const { Button } = require('@eartharoid/dbf');
 
+// Store original names in memory (shared with unclaim.js)
+global.ticketOriginalNames = global.ticketOriginalNames || new Map();
+
 module.exports = class ClaimButton extends Button {
     constructor(client, options) {
        super(client, {
@@ -15,37 +18,34 @@ module.exports = class ClaimButton extends Button {
     async run(id, interaction) {
        /** @type {import("client")} */
        const client = this.client;
-
-       // First claim the ticket
-       await client.tickets.claim(interaction);
-
-       // Get the current channel
        const channel = interaction.channel;
 
-       // Get the claimer's username
-       const claimerName = interaction.user.username;
+       // Store the original channel name before claiming
+       if (!global.ticketOriginalNames.has(channel.id)) {
+          global.ticketOriginalNames.set(channel.id, channel.name);
+          console.log(`Stored original name: "${channel.name}" for channel ${channel.id}`);
+       }
 
-       // Edit the channel name to include the claimer's name
-       // You can customize the format as needed
-       try {
-          // Option 1: Replace entire channel name with format: ticket-claimername
-          await channel.setName(`ticket-${claimerName.toLowerCase().replace(/\s+/g, '-')}`);
-
-          // Option 2: If you want to keep the original ticket ID/number and add the claimer's name:
-          // const currentName = channel.name;
-          // await channel.setName(`${currentName}-${claimerName.toLowerCase().replace(/\s+/g, '-')}`);
-
-          // Send confirmation message (optional)
-          await interaction.followUp({
-             content: `Ticket claimed and renamed by ${interaction.user}`,
-             ephemeral: true
-          });
-       } catch (error) {
-          console.error('Error renaming channel:', error);
-          await interaction.followUp({
-             content: 'Ticket claimed but could not rename channel.',
-             ephemeral: true
-          });
+       // Claim the ticket and check if it was successful
+       const claimResult = await client.tickets.claim(interaction);
+       
+       // Only rename the channel if the claim was successful
+       // The claim function returns undefined on success, or returns a response object on failure
+       if (claimResult === undefined) {
+          // Rename the channel after successful claiming
+          setTimeout(async () => {
+             try {
+                const claimerName = interaction.user.username;
+                const newName = `ticket-${claimerName.toLowerCase().replace(/[^a-z0-9-]/g, '-')}`;
+                await channel.setName(newName);
+                console.log(`Renamed channel from "${global.ticketOriginalNames.get(channel.id)}" to "${newName}"`);
+             } catch (error) {
+                console.error('Error renaming channel:', error);
+             }
+          }, 500);
+       } else {
+          // Claim failed (non-staff user), don't rename the channel
+          console.log(`Claim failed for user ${interaction.user.username}, channel name unchanged`);
        }
     }
 };
