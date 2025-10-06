@@ -21,10 +21,9 @@ module.exports = class ClaimButton extends Button {
        const channel = interaction.channel;
 
        // Store the original channel name before claiming
-       if (!global.ticketOriginalNames.has(channel.id)) {
-          global.ticketOriginalNames.set(channel.id, channel.name);
-          console.log(`Stored original name: "${channel.name}" for channel ${channel.id}`);
-       }
+       // Always update the stored name to the current name, in case the channel was renamed
+       global.ticketOriginalNames.set(channel.id, channel.name);
+       console.log(`Stored original name: "${channel.name}" for channel ${channel.id}`);
 
        // Claim the ticket and check if it was successful
        const claimResult = await client.tickets.claim(interaction);
