@@ -26,7 +26,9 @@ module.exports = class ClaimButton extends Button {
        console.log(`Stored original name: "${channel.name}" for channel ${channel.id}`);
 
        // Claim the ticket and check if it was successful
+       console.log(`Calling claim function for user ${interaction.user.username}`);
        const claimResult = await client.tickets.claim(interaction);
+       console.log(`Claim function returned:`, claimResult);
        
        // Only rename the channel if the claim was successful
        // The claim function returns undefined on success, or returns a response object on failure
@@ -37,8 +39,14 @@ module.exports = class ClaimButton extends Button {
              const newName = `ticket-${claimerName.toLowerCase().replace(/[^a-z0-9-]/g, '-')}`;
              const currentName = channel.name;
              console.log(`Attempting to rename channel from "${currentName}" to "${newName}"`);
-             await channel.setName(newName);
-             console.log(`Successfully renamed channel from "${currentName}" to "${newName}"`);
+             
+             // Check if the names are different before attempting to rename
+             if (currentName !== newName) {
+                await channel.setName(newName);
+                console.log(`Successfully renamed channel from "${currentName}" to "${newName}"`);
+             } else {
+                console.log(`Channel name is already "${newName}", no need to rename`);
+             }
           } catch (error) {
              console.error('Error renaming channel:', error);
           }

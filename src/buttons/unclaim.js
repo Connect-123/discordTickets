@@ -18,9 +18,15 @@ module.exports = class UnclaimButton extends Button {
 		const channel = interaction.channel;
 
 		try {
-			// Call the release function first
+			// Call the release function first with a timeout
 			console.log(`Starting unclaim process for channel ${channel.id}`);
-			await client.tickets.release(interaction);
+			
+			const releasePromise = client.tickets.release(interaction);
+			const timeoutPromise = new Promise((_, reject) => 
+				setTimeout(() => reject(new Error('Release function timeout')), 10000)
+			);
+			
+			await Promise.race([releasePromise, timeoutPromise]);
 			console.log(`Release function completed for channel ${channel.id}`);
 
 			// Restore the original channel name if it was stored
@@ -39,6 +45,14 @@ module.exports = class UnclaimButton extends Button {
 			}
 		} catch (error) {
 			console.error('Error in unclaim button:', error);
+			// Try to reply with an error message if the interaction hasn't been replied to yet
+			try {
+				if (!interaction.replied && !interaction.deferred) {
+					await interaction.reply({ content: 'An error occurred while unclaiming the ticket.', ephemeral: true });
+				}
+			} catch (replyError) {
+				console.error('Error sending error reply:', replyError);
+			}
 		}
 	}
 };
