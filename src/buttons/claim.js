@@ -44,17 +44,26 @@ module.exports = class ClaimButton extends Button {
              if (currentName !== newName) {
                 console.log(`About to call channel.setName("${newName}")`);
                 try {
-                   // Add a small delay to avoid rate limits
-                   await new Promise(resolve => setTimeout(resolve, 1000));
+                   // Add a longer delay to avoid rate limits
+                   console.log(`Waiting 3 seconds before renaming...`);
+                   await new Promise(resolve => setTimeout(resolve, 3000));
                    console.log(`Calling channel.setName("${newName}") now...`);
-                   await channel.setName(newName);
+                   
+                   // Add a timeout to the channel rename operation
+                   const renamePromise = channel.setName(newName);
+                   const timeoutPromise = new Promise((_, reject) => 
+                      setTimeout(() => reject(new Error('Channel rename timeout')), 10000)
+                   );
+                   
+                   await Promise.race([renamePromise, timeoutPromise]);
                    console.log(`Successfully renamed channel from "${currentName}" to "${newName}"`);
                 } catch (renameError) {
                    console.error(`Failed to rename channel from "${currentName}" to "${newName}":`, renameError);
                    console.error('Rename error details:', {
                       code: renameError.code,
                       message: renameError.message,
-                      status: renameError.status
+                      status: renameError.status,
+                      name: renameError.name
                    });
                 }
              } else {
