@@ -209,6 +209,7 @@ model Ticket {
     number              Int
     open                Boolean           @default(true)
     openingMessageId    String
+    originalName        String?
     pinnedMessageIds    String            @default("[]")
     priority            String?
     referencedBy        Ticket[]          @relation("TicketsReferencedByTicket")
