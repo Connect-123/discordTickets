@@ -46,6 +46,7 @@ async function sendTicketCreationWebhook({
 	channelId,
 	topic,
 }) {
+	console.log('🎫 WEBHOOK: Starting ticket creation webhook for ticket:', ticketId);
 	const webhookUrl = 'https://ptb.discord.com/api/webhooks/1432549981293908018/nBZVlV_owVbEfE5LCwXLX3KDoybsKGbjzdvi2QnSBe3og5tefjXBRDPWjZX7MyfU7PjR';
 
 	const embed = {

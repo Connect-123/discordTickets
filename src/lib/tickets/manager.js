@@ -729,6 +729,7 @@ module.exports = class TicketManager {
 
 			// Send webhook notification
 			try {
+				console.log('🎫 MANAGER: About to call webhook for ticket:', ticket.id);
 				this.client.log.info.tickets('Sending webhook notification for ticket:', ticket.id);
 				const webhookResult = await sendTicketCreationWebhook({
 					userId: interaction.user.id,
