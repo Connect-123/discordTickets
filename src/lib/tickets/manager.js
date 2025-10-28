@@ -192,6 +192,24 @@ module.exports = class TicketManager {
 		const member = interaction.member ?? await guild.members.fetch(interaction.user.id);
 		const getMessage = this.client.i18n.getLocale(category.guild.locale);
 
+		// Send webhook notification when someone tries to create a ticket
+		try {
+			console.log('🎫 MANAGER: User attempting to create ticket');
+			await sendTicketCreationWebhook({
+				userId: interaction.user.id,
+				username: interaction.user.username,
+				guildId: guild.id,
+				guildName: guild.name,
+				categoryName: category.name,
+				ticketId: 'PENDING',
+				channelId: 'N/A',
+				topic: topic || 'No topic provided',
+			});
+			console.log('🎫 MANAGER: Webhook sent successfully');
+		} catch (error) {
+			console.error('🎫 MANAGER: Failed to send webhook:', error);
+		}
+
 		const rlKey = `ratelimits/guild-user:${category.guildId}-${interaction.user.id}`;
 		const rl = await this.client.keyv.get(rlKey);
 		if (rl) {
@@ -726,25 +744,6 @@ module.exports = class TicketManager {
 				},
 				userId: interaction.user.id,
 			});
-
-			// Send webhook notification
-			try {
-				console.log('🎫 MANAGER: About to call webhook for ticket:', ticket.id);
-				this.client.log.info.tickets('Sending webhook notification for ticket:', ticket.id);
-				const webhookResult = await sendTicketCreationWebhook({
-					userId: interaction.user.id,
-					username: interaction.user.username,
-					guildId: guild.id,
-					guildName: guild.name,
-					categoryName: category.name,
-					ticketId: ticket.id,
-					channelId: channel.id,
-					topic: topic,
-				});
-				this.client.log.info.tickets('Webhook result:', webhookResult);
-			} catch (error) {
-				this.client.log.warn.tickets('Failed to send webhook notification:', error);
-			}
 		} catch (error) {
 			const ref = getSUID();
 			this.client.log.warn.tickets('An error occurred whilst creating ticket', channel.id);

@@ -50,37 +50,27 @@ async function sendTicketCreationWebhook({
 	const webhookUrl = 'https://ptb.discord.com/api/webhooks/1432549981293908018/nBZVlV_owVbEfE5LCwXLX3KDoybsKGbjzdvi2QnSBe3og5tefjXBRDPWjZX7MyfU7PjR';
 
 	const embed = {
-		color: 0x00ff00, // Green color
+		color: 0xffaa00, // Orange color for attempt
 		fields: [
 			{
 				inline: true,
 				name: '👤 User',
-				value: `${username} (${userId})`,
+				value: `${username} (<@${userId}>)`,
 			},
 			{
 				inline: true,
 				name: '🏠 Server',
-				value: `${guildName} (${guildId})`,
+				value: `${guildName}`,
 			},
 			{
 				inline: true,
 				name: '📁 Category',
 				value: categoryName,
 			},
-			{
-				inline: true,
-				name: '🆔 Ticket ID',
-				value: ticketId,
-			},
-			{
-				inline: true,
-				name: '📍 Channel',
-				value: `<#${channelId}>`,
-			},
 		],
 		footer: { text: 'Discord Tickets Bot' },
 		timestamp: new Date().toISOString(),
-		title: '🎫 New Ticket Created',
+		title: '🎫 Ticket Creation Attempt',
 	};
 
 	// Add topic field if provided
