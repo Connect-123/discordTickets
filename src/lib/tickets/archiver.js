@@ -7,7 +7,12 @@ const { crypto } = pools;
  * @param {import("discord.js").GuildMember} member
  * @returns {import("discord.js").Role}
  */
-const hoistedRole = member => member.roles.hoist || member.guild.roles.everyone;
+const hoistedRole = member => {
+	if (!member || !member.roles) {
+		return member?.guild?.roles?.everyone || null;
+	}
+	return member.roles.hoist || member.guild.roles.everyone;
+};
 
 module.exports = class TicketArchiver {
 	constructor(client) {
@@ -39,10 +44,15 @@ module.exports = class TicketArchiver {
 		try {
 			const queries = [];
 
-			members.add(message.member);
+			if (message.member) {
+				members.add(message.member);
+			}
 
 			for (const member of members) {
-				roles.add(hoistedRole(member));
+				const role = hoistedRole(member);
+				if (role) {
+					roles.add(role);
+				}
 			}
 
 			for (const role of roles) {
@@ -70,12 +80,15 @@ module.exports = class TicketArchiver {
 			}
 
 			for (const member of members) {
+				if (!member || !member.user) continue;
+				
+				const hoistedRoleResult = hoistedRole(member);
 				const data = {
 					avatar: member.avatar || member.user.avatar, // TODO: save avatar in user/avatars/
 					bot: member.user.bot,
 					discriminator: member.user.discriminator,
 					displayName: member.displayName ? await crypto.queue(w => w.encrypt(member.displayName)) : null,
-					roleId: !!member && hoistedRole(member).id,
+					roleId: hoistedRoleResult ? hoistedRoleResult.id : null,
 					username: await crypto.queue(w => w.encrypt(member.user.username)),
 				};
 				queries.push(
