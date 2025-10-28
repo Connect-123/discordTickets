@@ -18,6 +18,7 @@ const ms = require('ms');
 const ExtendedEmbedBuilder = require('../embed');
 const { logTicketEvent } = require('../logging');
 const { isStaff } = require('../users');
+const { sendTicketCreationWebhook } = require('../webhook');
 const { Collection } = require('discord.js');
 const spacetime = require('spacetime');
 
@@ -725,6 +726,22 @@ module.exports = class TicketManager {
 				},
 				userId: interaction.user.id,
 			});
+
+			// Send webhook notification
+			try {
+				await sendTicketCreationWebhook({
+					userId: interaction.user.id,
+					username: interaction.user.username,
+					guildId: guild.id,
+					guildName: guild.name,
+					categoryName: category.name,
+					ticketId: ticket.id,
+					channelId: channel.id,
+					topic: topic,
+				});
+			} catch (error) {
+				this.client.log.warn.tickets('Failed to send webhook notification:', error);
+			}
 		} catch (error) {
 			const ref = getSUID();
 			this.client.log.warn.tickets('An error occurred whilst creating ticket', channel.id);
