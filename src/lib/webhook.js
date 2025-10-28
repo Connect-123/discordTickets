@@ -83,9 +83,7 @@ async function sendTicketCreationWebhook({
 	}
 
 	const webhookData = {
-		avatar_url: 'https://cdn.discordapp.com/emojis/1234567890123456789.png', // You can replace this with a custom avatar
 		embeds: [embed],
-		username: 'Ticket Bot',
 	};
 
 	return await sendWebhook(webhookUrl, webhookData);
