@@ -1200,6 +1200,10 @@ module.exports = class TicketManager {
 	async acceptClose(interaction) {
 		const ticket = await this.getTicket(interaction.channel.id);
 		const getMessage = this.client.i18n.getLocale(ticket.guild.locale);
+
+		// Get stale data safely to prevent null reference errors
+		const staleData = this.$stale.get(interaction.channel.id) || {};
+
 		await interaction.editReply({
 			embeds: [
 				new ExtendedEmbedBuilder({
@@ -1212,7 +1216,7 @@ module.exports = class TicketManager {
 			],
 		});
 		await new Promise(resolve => setTimeout(resolve, 3e3));
-		await this.finallyClose(interaction.channel.id, this.$stale.get(interaction.channel.id) || {});
+		await this.finallyClose(interaction.channel.id, staleData);
 	}
 
 	/**
