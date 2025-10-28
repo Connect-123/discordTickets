@@ -729,7 +729,8 @@ module.exports = class TicketManager {
 
 			// Send webhook notification
 			try {
-				await sendTicketCreationWebhook({
+				this.client.log.info.tickets('Sending webhook notification for ticket:', ticket.id);
+				const webhookResult = await sendTicketCreationWebhook({
 					userId: interaction.user.id,
 					username: interaction.user.username,
 					guildId: guild.id,
@@ -739,6 +740,7 @@ module.exports = class TicketManager {
 					channelId: channel.id,
 					topic: topic,
 				});
+				this.client.log.info.tickets('Webhook result:', webhookResult);
 			} catch (error) {
 				this.client.log.warn.tickets('Failed to send webhook notification:', error);
 			}

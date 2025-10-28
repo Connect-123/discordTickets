@@ -17,8 +17,8 @@ async function sendWebhook(webhookUrl, data) {
 		}
 
 		return true;
-	} catch {
-		// Use a proper logger instead of console
+	} catch (error) {
+		console.error('Webhook error:', error.message);
 		return false;
 	}
 }
